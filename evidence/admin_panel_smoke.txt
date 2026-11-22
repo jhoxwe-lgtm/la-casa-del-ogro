@@ -1,0 +1,5 @@
+Panel Administración y pruebas — evidencia de pruebas automatizadas
+Fecha: 2026-11-18
+Suite backend/API ejecutada con Pytest: 58 passed, 0 failed.
+Cobertura de soporte administrativa: acceso por rol, gestión CRUD de habitaciones, huéspedes, reservas y usuarios, estados operativos, limpieza, sensores, capacidades, reinicio controlado, bitácora, migración de base v2 y protección de rutas.
+La suite verifica los endpoints y la persistencia compartida. Las capturas del navegador y las demostraciones manuales todavía deben obtenerse en el computador del equipo para adjuntarlas a la presentación.

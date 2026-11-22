@@ -1,0 +1,20 @@
+La Casa del Ogro — versión 3: Administración y pruebas manuales ampliadas
+
+Se amplía el panel administrativo dentro de la misma aplicación y la misma base SQLite usada por Recepción y Limpieza.
+
+- Habitaciones: crear, editar, desactivar/reactivar, eliminar cuando no exista historial; capacidad sincronizada con el espacio monitorizado; acciones manuales seguras de limpieza y estado.
+- Huéspedes: crear, editar y eliminar cuando no tengan reservas asociadas.
+- Reservas: crear, editar, cancelar, check-in/check-out y eliminar cuando no estén en curso, con validaciones de fechas y disponibilidad.
+- Usuarios: crear, editar nombre/rol, activar/desactivar, restablecer contraseña y eliminar cuando no exista historial.
+- Sensores/aforo: crear, retirar/desactivar sensores, modificar capacidad y enviar lecturas simuladas.
+- Pruebas manuales: valores 19/20/21, dato antiguo para RNF-06, estado de sensores, consulta de historial, solicitudes concurrentes exploratorias y health check.
+- Bitácora administrativa y reinicio de datos operativos con frase de confirmación.
+- Migración automática desde la base de la versión 2, conservando registros previos.
+
+Validación automatizada: 58 pruebas aprobadas (30 RF/RNF y 28 pruebas adicionales del panel). Las validaciones manuales en navegador siguen requiriendo evidencia del equipo que se usará en la evaluación.
+
+
+Actualización de red local:
+- Añadido run_red_local.bat para escuchar en 0.0.0.0:8000 sin cambiar el modo local predeterminado.
+- El servidor muestra la IPv4 probable de la interfaz de salida; confirmar siempre con ipconfig.
+- Añadida guía docs/ACCESO_RED_LOCAL_WINDOWS.md con firewall, diagnóstico y advertencias para redes institucionales.
