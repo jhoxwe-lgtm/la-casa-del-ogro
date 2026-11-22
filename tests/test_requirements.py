@@ -19,23 +19,42 @@ def test_RF03_registrar_huesped(client):
     gid=guest(client); status,rows,_=client.request('GET','/api/guests')
     assert status==200 and any(r['id']==gid and r['email']=='ana@example.com' for r in rows)
 
-# RF-04: consultar los tres estados mediante transiciones reales del flujo hotelero.
+# RF-04: consultar los tres estados simultáneamente mediante transiciones reales.
 def test_RF04_consultar_estado_habitaciones(client, clock):
-    rid, rid_room = reservation(client, checkin='2026-11-25T15:00:00-03:00', checkout='2026-11-26T12:00:00-03:00')
+    rid_cleaning, room_cleaning = reservation(
+        client, number='101',
+        checkin='2026-11-25T15:00:00-03:00',
+        checkout='2026-11-26T12:00:00-03:00'
+    )
+    rid_occupied, room_occupied = reservation(
+        client, number='102',
+        checkin='2026-11-25T15:00:00-03:00',
+        checkout='2026-11-26T12:00:00-03:00'
+    )
+
+    # Antes del check-in hay habitaciones disponibles.
     status, rooms, _ = client.request('GET', '/api/rooms')
-    assert status == 200 and any(r['state'] == 'disponible' for r in rooms)
+    assert status == 200
+    assert any(r['state'] == 'disponible' for r in rooms)
+
+    # Dos habitaciones quedan ocupadas por check-in válido.
     clock['value'] = '2026-11-25T15:30:00-03:00'
-    status, _, _ = client.request('POST', f'/api/reservations/{rid}/check-in', {})
-    assert status == 200
+    assert client.request('POST', f'/api/reservations/{rid_cleaning}/check-in', {})[0] == 200
+    assert client.request('POST', f'/api/reservations/{rid_occupied}/check-in', {})[0] == 200
     status, rooms, _ = client.request('GET', '/api/rooms')
-    assert status == 200 and next(r for r in rooms if r['id'] == rid_room)['state'] == 'ocupada'
+    assert status == 200
+    assert next(r for r in rooms if r['id'] == room_cleaning)['state'] == 'ocupada'
+    assert next(r for r in rooms if r['id'] == room_occupied)['state'] == 'ocupada'
+
+    # El checkout de 101 la deja en limpieza; 102 permanece ocupada y 201 disponible.
     clock['value'] = '2026-11-26T11:30:00-03:00'
-    status, _, _ = client.request('POST', f'/api/reservations/{rid}/check-out', {})
-    assert status == 200
+    assert client.request('POST', f'/api/reservations/{rid_cleaning}/check-out', {})[0] == 200
     status, rooms, _ = client.request('GET', '/api/rooms')
     assert status == 200
-    states = {r['state'] for r in rooms}
-    assert {'disponible', 'ocupada', 'en limpieza'} <= states
+    by_id = {r['id']: r['state'] for r in rooms}
+    assert by_id[room_cleaning] == 'en limpieza'
+    assert by_id[room_occupied] == 'ocupada'
+    assert any(state == 'disponible' for state in by_id.values())
 
 # RF-05: limpieza termina y libera la habitación.
 def test_RF05_finalizar_limpieza_libera_habitacion(client, clock):
