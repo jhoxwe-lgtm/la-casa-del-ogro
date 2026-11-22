@@ -7,16 +7,13 @@ Versión: prototipo del Ejercicio 4 con panel de Administración completa (v3).
 
 ## 1. Estrategia y alcance
 
-Se definió al menos un caso de prueba por cada requisito funcional RF-01 a RF-17 y por cada requisito no funcional RNF-01 a RNF-07: 24 casos mínimos, ampliados con casos complementarios de límites, permisos y caminos alternativos. Las pruebas unitarias y de integración de este prototipo se ejecutan con Pytest y una base SQLite temporal; las rutas se prueban como caja negra desde sus entradas y salidas HTTP. La validación de permisos también verifica que una acción no autorizada no se ejecute.
-
-| Nivel | Qué se prueba | Tipo / técnica | Herramienta | Criterio |
+| Nivel | Qué se prueba | Tipo/técnica | Herramienta | Criterio de término |
 |---|---|---|---|---|
-| Unitaria / lógica de servicio | Reglas de fechas, disponibilidad, cambios de estado y comparación de aforo | Caja negra y valores límite; se verifican decisiones a través de la API | Pytest + SQLite temporal | El caso produce el resultado esperado |
-| Integración | API, persistencia, usuarios, reservas, limpiezas, sensores y alertas | Caja negra; prueba de interfaces entre módulos | Pytest + SQLite temporal | El dato queda guardado y se refleja en la consulta correspondiente |
-| Sistema / aceptación | Flujo visible de la aplicación web por los roles | Caja negra; recorrido manual de los flujos principales y alternativos | Navegador web | El personal puede completar el flujo y observar el resultado |
+| Unitaria | Regla pura `classify_occupancy(count, capacity)`: conteo menor, igual y mayor | Caja blanca: dos decisiones y caminos independientes; caja negra: valores de frontera | Pytest aislado; pytest-cov con cobertura de ramas | Tres caminos. V(G) = 2 decisiones + 1 = 3. Se cubren ambos lados de cada decisión. |
+| Integración | Rutas HTTP, autenticación, reservas, limpieza, sensores, alertas y persistencia SQLite | Caja negra en interfaces: entradas, códigos HTTP, salidas y cambios persistidos; límites/alternativos | Pytest, WSGIClient y SQLite temporal | Resultado esperado y cambio consultable; acción no autorizada no modifica datos. |
+| Sistema | Recorridos completos por navegador para Recepción, Limpieza y Administrador; reserva y aforo | Caja negra, casos de uso y RNF; manual reproducible | Chrome/Edge, aplicación local/LAN, capturas y logs | Flujos principales y alternativos críticos; fecha, commit y evidencia. Los casos manuales pendientes no se marcan aprobados. |
 
-El hardware de sensores queda simulado, porque el informe de los Ejercicios 1 y 2 excluye la compra/instalación de sensores y permite usar lecturas simuladas. No se incluye bloqueo físico de accesos.
-
+WSGI/API no se considera prueba de sistema de navegador: no automatiza clics ni renderizado. Los recorridos reales se especifican en `docs/CASOS_PRUEBA_SISTEMA.md`. Los sensores son simulados según el alcance; no se afirma validar hardware físico.
 ## 2. Casos de prueba — funcionales
 
 Los pasos pueden ejecutarse en la interfaz cuando el módulo está disponible o mediante la API `/api/...`. El archivo `tests/test_requirements.py` contiene la ejecución automatizada de estos casos.
@@ -59,13 +56,13 @@ Ejecución realizada sobre el prototipo entregado:
 
 | Métrica | Resultado |
 |---|---:|
-| Casos automatizados planificados | 58 (30 de RF/RNF + 28 de administración) |
-| Casos automatizados ejecutados | 58 |
-| Aprobados | 58 |
-| Fallidos | 0 |
-| Bloqueados en esta suite | 0 |
+| Casos automatizados planificados | 62 (31 RF/RNF/complementarias + 28 administrativas + 3 unitarias) |
+| Casos automatizados ejecutados | Pendiente de CI (62 planificados) |
+| Aprobados | Pendiente de CI |
+| Fallidos | Pendiente de CI |
+| Bloqueados en esta suite | Pendiente de CI |
 
-Esta tabla corresponde a la suite automatizada ejecutada con Pytest. Las comprobaciones manuales de RNF-03 (99 % mensual) y RNF-04 (interacciones reales) deben conservar su propia evidencia y no se deben declarar validadas solo por el resultado automatizado.
+La línea base v3 fue de 58 pruebas aprobadas en 9,91 s (commit 30890233b278dd1181255e30773551889012950f). La rama de auditoría agrega tres unitarias y una prueba de recuperación de telemetría; el resultado definitivo se obtiene del workflow GitHub Actions. RNF-03 y RNF-04 requieren evidencia manual.
 
 ## 5. Riesgos y limitaciones conocidos
 
@@ -142,3 +139,16 @@ La suite incluye 28 pruebas del panel administrativo. Estas pruebas no reemplaza
 
 Cada evidencia de ejecución que se incluya en el informe debe llevar ID del caso, fecha y versión/commit del código. El resultado automatizado de Pytest no reemplaza la captura del flujo manual en el navegador.
 
+
+
+## 7. Cobertura de caja blanca
+
+`classify_occupancy` contiene dos decisiones; V(G) = 2 + 1 = 3.
+
+| Caso | count == capacity | count > capacity | Entrada | Salida |
+|---|---|---|---|---|
+| CP-UNIT-RF15-01 | Falso | Falso | 19/20 | normal |
+| CP-UNIT-RF16-01 | Verdadero | No evaluada por retorno | 20/20 | completo |
+| CP-UNIT-RF16-02 | Falso | Verdadero | 21/20 | excedido |
+
+Los tres casos ejecutan caminos independientes y ambos lados de cada decisión. El workflow mide cobertura de ramas únicamente para `casa_ogro.rules`.

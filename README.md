@@ -1,4 +1,4 @@
-# La Casa del Ogro — Ejercicio 4 (versión 3)
+# La Casa del Ogro — Ejercicio 4 (versión 4, auditoría de calidad)
 
 Prototipo web para el Sistema de Gestión Hotelera **La Casa del Ogro**, basado en los requisitos RF-01 a RF-17 y RNF-01 a RNF-07 del informe de los Ejercicios 2 y 3. Incluye una aplicación web para los roles Recepción, Limpieza y Administración, pruebas automatizadas con Pytest y un panel de Administración completa para preparar y demostrar casos manuales.
 
@@ -7,7 +7,7 @@ Prototipo web para el Sistema de Gestión Hotelera **La Casa del Ogro**, basado 
 - Python 3.10 o superior (recomendado 3.11+).
 - Servidor WSGI y SQLite de la biblioteca estándar; no requiere Flask ni servidor de base de datos externo.
 - HTML, CSS y JavaScript sin framework.
-- Pytest para pruebas automatizadas.
+- Pytest y pytest-cov para pruebas unitarias, integración y medición de ramas.
 
 ## Ejecutar en Windows
 
@@ -60,7 +60,12 @@ La sección incluye un recorrido recomendado en `docs/GUIA_PANEL_ADMINISTRACION.
 
 - Plan detallado: `docs/PLAN_DE_PRUEBAS.md`.
 - Matriz RF/RNF y pruebas de administración: `docs/MATRIZ_COBERTURA.csv`.
-- Código automatizado: `tests/test_requirements.py`.
+- Código de integración: `tests/test_requirements.py`.
+- Pruebas unitarias: `tests/test_unit_business_rules.py` y `casa_ogro/rules.py`.
+- Casos detallados: `docs/CASOS_PRUEBA_DETALLADOS.md`.
+- Casos manuales: `docs/CASOS_PRUEBA_SISTEMA.md`.
+- Registros: `docs/REGISTRO_EJECUCION.md` y `docs/REGISTRO_DEFECTOS.md`.
+- CI: `.github/workflows/quality.yml`.
 - Evidencia de ejecución Pytest: `evidence/pytest_results.txt`.
 
 Ejecuta `run_tests.bat` o usa:
@@ -69,7 +74,7 @@ Ejecuta `run_tests.bat` o usa:
 py -m pytest -v
 ```
 
-La suite de esta versión contiene **58 pruebas automatizadas**: 30 casos asociados a RF/RNF (17 funcionales, 7 no funcionales y 6 complementarios) y 28 pruebas del panel administrativo ampliado. La evidencia se genera desde la ejecución actual; si modificas el código, vuelve a ejecutar la suite y reemplaza el registro.
+La rama de auditoría planifica **62 pruebas automatizadas**: 30 RF/RNF y complementarias, 28 administrativas, 3 unitarias y 1 recuperación de telemetría. El resultado v4 se consulta en GitHub Actions y el artefacto `pytest-results`; la salida de 58 pruebas es línea base v3.
 
 ## Limitaciones que deben explicarse en la presentación
 
@@ -93,13 +98,8 @@ Al iniciar, v3 migra automáticamente la base anterior: agrega `rooms.active` y 
 
 Crear una habitación crea también un espacio monitorizado y un sensor simulado. Desactivar una habitación o cuenta permite retirarla sin perder historial. Un sensor con lecturas se desactiva en lugar de eliminarse. El botón de limpieza de demostración borra únicamente datos operativos (huéspedes, reservas, limpiezas, lecturas y alertas), conservando usuarios, habitaciones, espacios, sensores, capacidades y bitácora. Requiere escribir exactamente `LIMPIAR DATOS OPERATIVOS`.
 
-## Respaldo en GitHub
+## Repositorio público y precauciones
 
-Este repositorio debe mantenerse **privado** mientras contenga el código del prototipo académico y las credenciales de demostración descritas arriba. No se incluye `data/casa_ogro.sqlite3`: la base local se crea automáticamente al iniciar la aplicación. Esto evita subir datos de huéspedes, usuarios o pruebas guardados en el equipo.
+El repositorio se publica para compartir el proyecto académico. Las cuentas y contraseñas de demostración del código son públicas y **no deben reutilizarse en un despliegue expuesto a Internet**. Antes de desplegar, sustituye la inicialización por credenciales mediante secretos/variables de entorno, invalida las contraseñas conocidas y revisa sesiones y protección CSRF.
 
-Antes de compartir el repositorio con otras personas:
-
-1. Cambia las contraseñas de demostración.
-2. No agregues archivos `.sqlite3`, `.db`, `.env`, tokens ni contraseñas reales.
-3. Mantén este repositorio privado salvo que el equipo decida conscientemente publicar una versión sanitizada.
-4. Para respaldar los datos operativos, realiza una copia cifrada de la base SQLite por separado y guárdala en un lugar privado; no la subas al repositorio de código.
+No se incluye `data/casa_ogro.sqlite3`. Nunca subas archivos `.sqlite3`, `.db`, `.env`, tokens, cadenas de conexión ni datos personales reales. El repositorio público contiene código, no aloja la aplicación.

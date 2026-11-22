@@ -57,3 +57,13 @@ ADMIN;ADM-25;Soporte de pruebas;Automatizada;tests/test_requirements.py;Rechazar
 ADMIN;ADM-26;Soporte de pruebas;Automatizada;tests/test_requirements.py;Sensor borrado sin historia no reaparece tras reinicio
 ADMIN;ADM-27;Soporte de pruebas;Automatizada;tests/test_requirements.py;Migración automática del esquema v2 a v3
 ADMIN;ADM-28;Soporte de pruebas;Automatizada;tests/test_requirements.py;Nuevas rutas administrativas protegidas por rol
+RF-15;CP-UNIT-RF15-01;Unitario (caja blanca);Automatizada;tests/test_unit_business_rules.py;19/20 -> normal
+RF-16;CP-UNIT-RF16-01;Unitario (caja blanca);Automatizada;tests/test_unit_business_rules.py;20/20 -> completo
+RF-16;CP-UNIT-RF16-02;Unitario (caja blanca);Automatizada;tests/test_unit_business_rules.py;21/20 -> excedido
+RNF-06;CP-RNF-06-03;Integración (caja negra);Automatizada;tests/test_requirements.py;Lectura antigua y recuperación
+RF-04;CP-RF-04-01;Integración (caja negra);Automatizada;tests/test_requirements.py;Tres estados por check-in/check-out
+RNF-03;CP-SYS-RNF03-01;Sistema (caja negra);Manual;docs/CASOS_PRUEBA_SISTEMA.md;Pendiente monitor mensual
+RNF-04;CP-SYS-RNF04-01;Sistema (caja negra);Manual;docs/CASOS_PRUEBA_SISTEMA.md;Pendiente medir interacciones
+RNF-05;CP-SYS-RNF05-01;Sistema (caja negra);Manual;docs/CASOS_PRUEBA_SISTEMA.md;Pendiente medir visualización
+RF-16;CP-SYS-AFORO-01;Sistema (caja negra);Manual;docs/CASOS_PRUEBA_SISTEMA.md;Pendiente recorrido aforo
+RF-01;CP-SYS-RESERVA-01;Sistema (caja negra);Manual;docs/CASOS_PRUEBA_SISTEMA.md;Pendiente recorrido reserva
