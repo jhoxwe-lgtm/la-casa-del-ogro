@@ -26,3 +26,4 @@ evidence/*.tmp
 Thumbs.db
 .vscode/
 .idea/
+.coverage
