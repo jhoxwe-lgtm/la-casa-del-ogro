@@ -7,6 +7,7 @@ from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server, WSGIServer
 from socketserver import ThreadingMixIn
 from .db import connect, init_db, verify_password, password_hash
+from .rules import classify_occupancy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DB = BASE_DIR / 'data' / 'casa_ogro.sqlite3'
@@ -470,9 +471,7 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                 received_at=data.get('timestamp') or current_time(); parse_dt(received_at)
                 cur=conn.execute('INSERT INTO readings(sensor_id,space_id,people_count,received_at) VALUES(?,?,?,?)',(sensor['sensor_id'],sensor['space_id'],count,received_at))
                 if user and user['role']=='admin': audit(conn,user,'enviar lectura','sensor',sensor['sensor_id'],f'conteo {count}')
-                cap=sensor['capacity']; level='normal'
-                if count==cap: level='completo'
-                elif count>cap: level='excedido'
+                cap=sensor['capacity']; level=classify_occupancy(count, cap)
                 alert_id=None
                 if level in ('completo','excedido'):
                     a=conn.execute('INSERT INTO alerts(space_id,reading_id,people_count,capacity,level,created_at) VALUES(?,?,?,?,?,?)',(sensor['space_id'],cur.lastrowid,count,cap,level,received_at)); alert_id=a.lastrowid
@@ -527,7 +526,7 @@ def occupancy_data(conn,current_time):
         last=conn.execute('SELECT * FROM readings WHERE space_id=? ORDER BY received_at DESC,id DESC LIMIT 1',(p['id'],)).fetchone()
         if not last: state='sin datos'; count=None; received=None
         else:
-            received=last['received_at']; count=last['people_count']; state='desactualizado' if now-parse_dt(received)>timedelta(minutes=2) else ('completo' if count==p['capacity'] else 'excedido' if count>p['capacity'] else 'normal')
+            received=last['received_at']; count=last['people_count']; state='desactualizado' if now-parse_dt(received)>timedelta(minutes=2) else classify_occupancy(count, p['capacity'])
         out.append({'space_id':p['id'],'name':p['name'],'kind':p['kind'],'capacity':p['capacity'],'count':count,'received_at':received,'state':state,'sensor_id':p['sensor_id']})
     return out
 

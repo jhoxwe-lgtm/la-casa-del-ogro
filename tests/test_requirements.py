@@ -19,10 +19,23 @@ def test_RF03_registrar_huesped(client):
     gid=guest(client); status,rows,_=client.request('GET','/api/guests')
     assert status==200 and any(r['id']==gid and r['email']=='ana@example.com' for r in rows)
 
-# RF-04: consultar el estado vigente de todas las habitaciones.
-def test_RF04_consultar_estado_habitaciones(client):
-    status,rooms,_=client.request('GET','/api/rooms')
-    assert status==200 and {'disponible','ocupada','en limpieza'} >= {r['state'] for r in rooms}
+# RF-04: consultar los tres estados mediante transiciones reales del flujo hotelero.
+def test_RF04_consultar_estado_habitaciones(client, clock):
+    rid, rid_room = reservation(client, checkin='2026-11-25T15:00:00-03:00', checkout='2026-11-26T12:00:00-03:00')
+    status, rooms, _ = client.request('GET', '/api/rooms')
+    assert status == 200 and any(r['state'] == 'disponible' for r in rooms)
+    clock['value'] = '2026-11-25T15:30:00-03:00'
+    status, _, _ = client.request('POST', f'/api/reservations/{rid}/check-in', {})
+    assert status == 200
+    status, rooms, _ = client.request('GET', '/api/rooms')
+    assert status == 200 and next(r for r in rooms if r['id'] == rid_room)['state'] == 'ocupada'
+    clock['value'] = '2026-11-26T11:30:00-03:00'
+    status, _, _ = client.request('POST', f'/api/reservations/{rid}/check-out', {})
+    assert status == 200
+    status, rooms, _ = client.request('GET', '/api/rooms')
+    assert status == 200
+    states = {r['state'] for r in rooms}
+    assert {'disponible', 'ocupada', 'en limpieza'} <= states
 
 # RF-05: limpieza termina y libera la habitación.
 def test_RF05_finalizar_limpieza_libera_habitacion(client, clock):
@@ -473,3 +486,19 @@ def test_ADMIN28_nuevas_rutas_administrativas_rechazan_roles_no_admin(client):
     assert client.request('POST','/api/admin/rooms',{'number':'777','room_type':'Doble','capacity':2})[0]==403
     assert client.request('POST','/api/admin/sensors',{'sensor_id':'sensor-extra','space_id':1})[0]==403
     assert client.request('POST','/api/admin/reset-operational-data',{'confirm':'LIMPIAR DATOS OPERATIVOS'})[0]==403
+
+# RNF-06 complementario: recuperar estado cuando vuelve la telemetría.
+def test_RNF06C_sensor_recupera_estado_despues_de_lectura_desactualizada(client, clock):
+    clock['value'] = '2026-11-17T10:03:01-03:00'
+    status, _, _ = client.request('POST', '/api/readings', {'sensor_id':'sensor-piscina','count':18,'timestamp':'2026-11-17T10:00:00-03:00'})
+    assert status == 201
+    status, spaces, _ = client.request('GET', '/api/occupancy')
+    pool = next(s for s in spaces if s['kind'] == 'piscina')
+    assert status == 200 and pool['state'] == 'desactualizado'
+    clock['value'] = '2026-11-17T10:03:02-03:00'
+    status, reading, _ = client.request('POST', '/api/readings', {'sensor_id':'sensor-piscina','count':15,'timestamp':'2026-11-17T10:03:02-03:00'})
+    assert status == 201 and reading['state'] == 'normal'
+    status, spaces, _ = client.request('GET', '/api/occupancy')
+    pool = next(s for s in spaces if s['kind'] == 'piscina')
+    assert status == 200 and pool['count'] == 15 and pool['state'] == 'normal'
+

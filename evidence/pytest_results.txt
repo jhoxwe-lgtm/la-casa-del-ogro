@@ -1,3 +1,7 @@
+# Línea base histórica v3 — NO corresponde a v4.
+# Commit 30890233b278dd1181255e30773551889012950f; 58 passed en 9,91s.
+# Para v4 consultar GitHub Actions y artefacto pytest-results.
+
 ============================= test session starts ==============================
 platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
 cachedir: .pytest_cache
