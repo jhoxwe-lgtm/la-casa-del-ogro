@@ -1,0 +1,59 @@
+﻿Requisito;Caso de prueba;Tipo;Ejecución;Archivo de evidencia;Observación
+RF-01;CP-RF-01-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-02;CP-RF-02-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-03;CP-RF-03-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-04;CP-RF-04-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-05;CP-RF-05-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-06;CP-RF-06-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-07;CP-RF-07-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-08;CP-RF-08-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-09;CP-RF-09-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-10;CP-RF-10-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-11;CP-RF-11-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-12;CP-RF-12-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-13;CP-RF-13-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-14;CP-RF-14-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-15;CP-RF-15-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-16;CP-RF-16-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RF-17;CP-RF-17-01;Funcional;Automatizada;tests/test_requirements.py;Automatizada en suite
+RNF-01;CP-RNF-01-01;No funcional;Automatizada;tests/test_requirements.py;Automatizada
+RNF-02;CP-RNF-02-01;No funcional;Automatizada;tests/test_requirements.py;Automatizada
+RNF-03;CP-RNF-03-01;No funcional;Automatizada / manual complementaria;tests/test_requirements.py;"Automatizada; requiere complemento de evidencia manual"
+RNF-04;CP-RNF-04-01;No funcional;Automatizada / manual complementaria;tests/test_requirements.py;"Automatizada; requiere complemento de evidencia manual"
+RNF-05;CP-RNF-05-01;No funcional;Automatizada;tests/test_requirements.py;Automatizada
+RNF-06;CP-RNF-06-01;No funcional;Automatizada;tests/test_requirements.py;Automatizada
+RNF-07;CP-RNF-07-01;No funcional;Automatizada;tests/test_requirements.py;Automatizada
+RF-06;CP-RF-06-02;Funcional;Automatizada;tests/test_requirements.py;Sensor desconocido no reemplaza última lectura
+RF-11;CP-RF-11-02;Funcional;Automatizada;tests/test_requirements.py;Check-out tardío: rechazo a recepción y autorización admin
+RF-12;CP-RF-12-02;Funcional;Automatizada;tests/test_requirements.py;Modificación tardía con autorización admin
+RF-13;CP-RF-13-02;Funcional;Automatizada;tests/test_requirements.py;Cancelación tardía con autorización admin
+RF-14;CP-RF-14-02;Funcional;Automatizada;tests/test_requirements.py;Capacidad de habitación también se verifica
+RNF-06;CP-RNF-06-02;No funcional;Automatizada;tests/test_requirements.py;Límite exacto 2 minutos
+ADMIN;ADM-01;Soporte de pruebas;Automatizada;tests/test_requirements.py;Panel de gestión accesible solo por Administrador
+ADMIN;ADM-02;Soporte de pruebas;Automatizada;tests/test_requirements.py;Editar huésped y reflejar datos en módulos principales
+ADMIN;ADM-03;Soporte de pruebas;Automatizada;tests/test_requirements.py;Eliminar huésped sin reservas
+ADMIN;ADM-04;Soporte de pruebas;Automatizada;tests/test_requirements.py;Protección de huésped con reservas asociadas
+ADMIN;ADM-05;Soporte de pruebas;Automatizada;tests/test_requirements.py;Editar reserva confirmada
+ADMIN;ADM-06;Soporte de pruebas;Automatizada;tests/test_requirements.py;Eliminar reserva cerrada y liberar huésped si corresponde
+ADMIN;ADM-07;Soporte de pruebas;Automatizada;tests/test_requirements.py;Preparar e iniciar/finalizar limpieza
+ADMIN;ADM-08;Soporte de pruebas;Automatizada;tests/test_requirements.py;Rechazar limpieza forzada sobre habitación ocupada
+ADMIN;ADM-09;Soporte de pruebas;Automatizada;tests/test_requirements.py;Proteger reserva en curso contra edición
+ADMIN;ADM-10;Soporte de pruebas;Automatizada;tests/test_requirements.py;Agregar habitación, espacio y sensor asociado
+ADMIN;ADM-11;Soporte de pruebas;Automatizada;tests/test_requirements.py;Editar habitación y sincronizar capacidad del espacio
+ADMIN;ADM-12;Soporte de pruebas;Automatizada;tests/test_requirements.py;Eliminar habitación sin historial y sus entidades asociadas
+ADMIN;ADM-13;Soporte de pruebas;Automatizada;tests/test_requirements.py;Desactivar habitación con historia y retirarla de operación
+ADMIN;ADM-14;Soporte de pruebas;Automatizada;tests/test_requirements.py;Reactivar habitación
+ADMIN;ADM-15;Soporte de pruebas;Automatizada;tests/test_requirements.py;Proteger habitación con reserva en curso
+ADMIN;ADM-16;Soporte de pruebas;Automatizada;tests/test_requirements.py;Permitir estados manuales acotados; ocupar mediante check-in
+ADMIN;ADM-17;Soporte de pruebas;Automatizada;tests/test_requirements.py;Editar usuario, rol y contraseña; validar nuevo login
+ADMIN;ADM-18;Soporte de pruebas;Automatizada;tests/test_requirements.py;Impedir que admin desactive su propia sesión
+ADMIN;ADM-19;Soporte de pruebas;Automatizada;tests/test_requirements.py;Eliminar usuario libre y conservar usuarios con historial
+ADMIN;ADM-20;Soporte de pruebas;Automatizada;tests/test_requirements.py;Evitar dos sensores activos en un mismo espacio
+ADMIN;ADM-21;Soporte de pruebas;Automatizada;tests/test_requirements.py;Desactivar sensor con lecturas sin borrar historial
+ADMIN;ADM-22;Soporte de pruebas;Automatizada;tests/test_requirements.py;Reinicio confirmado de datos operativos preservando configuración
+ADMIN;ADM-23;Soporte de pruebas;Automatizada;tests/test_requirements.py;Bitácora protegida y registro de cambios
+ADMIN;ADM-24;Soporte de pruebas;Automatizada;tests/test_requirements.py;Rechazar habitación duplicada y capacidad inválida
+ADMIN;ADM-25;Soporte de pruebas;Automatizada;tests/test_requirements.py;Rechazar lecturas de sensor inactivo
+ADMIN;ADM-26;Soporte de pruebas;Automatizada;tests/test_requirements.py;Sensor borrado sin historia no reaparece tras reinicio
+ADMIN;ADM-27;Soporte de pruebas;Automatizada;tests/test_requirements.py;Migración automática del esquema v2 a v3
+ADMIN;ADM-28;Soporte de pruebas;Automatizada;tests/test_requirements.py;Nuevas rutas administrativas protegidas por rol

@@ -1,0 +1,6 @@
+Prueba de inicio de la versión 3
+Servidor local iniciado con `python -m casa_ogro.webapp`.
+GET /health: respuesta correcta del servicio.
+GET /: HTML de la aplicación entregado correctamente y contiene la pestaña Administración y pruebas.
+Las rutas de administración, autorización, persistencia, operaciones CRUD y migración se validan adicionalmente mediante la suite Pytest (58 pruebas aprobadas).
+La prueba de servidor confirma disponibilidad en el instante de la ejecución; no demuestra RNF-03 (99 % mensual). Las pruebas de navegador/capturas para presentación deben ejecutarse en el computador del equipo.
