@@ -65,6 +65,7 @@ La sección incluye un recorrido recomendado en `docs/GUIA_PANEL_ADMINISTRACION.
 - Casos detallados: `docs/CASOS_PRUEBA_DETALLADOS.md`.
 - Casos manuales: `docs/CASOS_PRUEBA_SISTEMA.md`.
 - Registros: `docs/REGISTRO_EJECUCION.md` y `docs/REGISTRO_DEFECTOS.md`.
+- Evidencia de CI v4: `evidence/pytest_results_v4.txt` (62/62 pruebas, run #4).
 - CI: `.github/workflows/quality.yml`.
 - Evidencia de ejecución Pytest: `evidence/pytest_results.txt`.
 
