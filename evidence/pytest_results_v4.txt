@@ -1,0 +1,92 @@
+EVIDENCIA AUTOMATIZADA V4 — LA CASA DEL OGRO
+Commit de código probado: 5cd414356550f4e5f3bbd52c5c1600900a3daea6
+Rama: quality/ejercicio4-auditoria
+Workflow: quality · GitHub Actions run #4
+URL: https://github.com/jhoxwe-lgtm/la-casa-del-ogro/actions/runs/45051510264
+Fecha de ejecución: 22-11-2026
+Entorno: Ubuntu 26.04.1, Python 3.12.16, Pytest 9.2.0, pytest-cov 7.1.0
+Resultado: 62 collected, 62 passed, 0 failed, 0 blocked, 12.60 s.
+Cobertura medida únicamente para casa_ogro/rules.py: 100% de sentencias y 100% de ramas (6 sentencias; 4 ramas; 0 missed; 0 partial).
+Nota: este porcentaje no representa la cobertura global de la aplicación ni sustituye las pruebas manuales de sistema/RNF.
+URL del artefacto completo: https://github.com/jhoxwe-lgtm/la-casa-del-ogro/actions/runs/45051510264/artifacts/14765257623
+
+--- SALIDA PYTEST DE GITHUB ACTIONS ---
+============================= test session starts ==============================
+2026-11-22T17:48:46.2024221Z platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0 -- /opt/hostedtoolcache/Python/3.12.16/x64/bin/python
+2026-11-22T17:48:46.2025095Z cachedir: .pytest_cache
+2026-11-22T17:48:46.2025457Z rootdir: /home/runner/work/la-casa-del-ogro/la-casa-del-ogro
+2026-11-22T17:48:46.2025818Z plugins: cov-7.1.0
+2026-11-22T17:48:46.4778598Z collecting ... collected 62 items
+2026-11-22T17:48:46.4779046Z 
+2026-11-22T17:48:46.6563573Z tests/test_requirements.py::test_RF01_registrar_reserva PASSED           [  1%]
+2026-11-22T17:48:46.8371598Z tests/test_requirements.py::test_RF02_disponibilidad_excluye_reserva_superpuesta PASSED [  3%]
+2026-11-22T17:48:47.0079598Z tests/test_requirements.py::test_RF03_registrar_huesped PASSED           [  4%]
+2026-11-22T17:48:47.2082829Z tests/test_requirements.py::test_RF04_consultar_estado_habitaciones PASSED [  6%]
+2026-11-22T17:48:47.4395110Z tests/test_requirements.py::test_RF05_finalizar_limpieza_libera_habitacion PASSED [  8%]
+2026-11-22T17:48:47.6112652Z tests/test_requirements.py::test_RF06_recibir_lectura_sensor PASSED      [  9%]
+2026-11-22T17:48:47.7846959Z tests/test_requirements.py::test_RF07_consultar_ultimo_conteo PASSED     [ 11%]
+2026-11-22T17:48:48.0255787Z tests/test_requirements.py::test_RF08_gestionar_usuarios_y_roles PASSED  [ 12%]
+2026-11-22T17:48:48.2693205Z tests/test_requirements.py::test_RF09_inicio_sesion_valida_e_invalida PASSED [ 14%]
+2026-11-22T17:48:48.4713744Z tests/test_requirements.py::test_RF10_checkin_regla_horaria PASSED       [ 16%]
+2026-11-22T17:48:48.6390960Z tests/test_requirements.py::test_RF11_checkout_y_estado_limpieza PASSED  [ 17%]
+2026-11-22T17:48:48.8081576Z tests/test_requirements.py::test_RF12_modificar_reserva PASSED           [ 19%]
+2026-11-22T17:48:48.9763445Z tests/test_requirements.py::test_RF13_cancelar_reserva PASSED            [ 20%]
+2026-11-22T17:48:49.1797813Z tests/test_requirements.py::test_RF14_configurar_capacidad PASSED        [ 22%]
+2026-11-22T17:48:49.3502704Z tests/test_requirements.py::test_RF15_comparar_conteo_y_capacidad PASSED [ 24%]
+2026-11-22T17:48:49.5170418Z tests/test_requirements.py::test_RF16_generar_alerta_al_alcanzar_o_superar_capacidad PASSED [ 25%]
+2026-11-22T17:48:49.6859427Z tests/test_requirements.py::test_RF17_revisar_alerta_conserva_estado PASSED [ 27%]
+2026-11-22T17:48:49.8860932Z tests/test_requirements.py::test_RNF01_permisos_por_rol PASSED           [ 29%]
+2026-11-22T17:48:50.4534838Z tests/test_requirements.py::test_RNF02_rendimiento_diez_consultas_concurrentes PASSED [ 30%]
+2026-11-22T17:48:50.6178974Z tests/test_requirements.py::test_RNF03_servicio_responde_healthcheck PASSED [ 32%]
+2026-11-22T17:48:50.7864418Z tests/test_requirements.py::test_RNF04_panel_entrega_estado_de_habitaciones PASSED [ 33%]
+2026-11-22T17:48:50.9523064Z tests/test_requirements.py::test_RNF05_lectura_visible_en_menos_de_diez_segundos PASSED [ 35%]
+2026-11-22T17:48:51.1387518Z tests/test_requirements.py::test_RNF06_conteo_antiguo_marcado_desactualizado PASSED [ 37%]
+2026-11-22T17:48:51.3045572Z tests/test_requirements.py::test_RNF07_lectura_no_acepta_imagenes_ni_datos_personales PASSED [ 38%]
+2026-11-22T17:48:51.5216822Z tests/test_requirements.py::test_RF11B_checkout_tardio_requiere_administrador PASSED [ 40%]
+2026-11-22T17:48:51.7283375Z tests/test_requirements.py::test_RF12B_modificacion_tardia_autorizada PASSED [ 41%]
+2026-11-22T17:48:51.9536642Z tests/test_requirements.py::test_RF13B_cancelacion_tardia_requiere_administrador PASSED [ 43%]
+2026-11-22T17:48:52.1318281Z tests/test_requirements.py::test_RF06B_sensor_desconocido_no_actualiza_conteo PASSED [ 45%]
+2026-11-22T17:48:52.3356966Z tests/test_requirements.py::test_RF14B_configurar_capacidad_habitacion PASSED [ 46%]
+2026-11-22T17:48:52.5005192Z tests/test_requirements.py::test_RNF06B_exactamente_dos_minutos_no_esta_desactualizado PASSED [ 48%]
+2026-11-22T17:48:52.7092644Z tests/test_requirements.py::test_ADMIN01_panel_de_gestion_solo_administrador PASSED [ 50%]
+2026-11-22T17:48:52.9164214Z tests/test_requirements.py::test_ADMIN02_editar_huesped_actualiza_registro_principal PASSED [ 51%]
+2026-11-22T17:48:53.1379497Z tests/test_requirements.py::test_ADMIN03_eliminar_huesped_sin_reservas PASSED [ 53%]
+2026-11-22T17:48:53.3613426Z tests/test_requirements.py::test_ADMIN04_no_eliminar_huesped_con_reservas_asociadas PASSED [ 54%]
+2026-11-22T17:48:53.5976039Z tests/test_requirements.py::test_ADMIN05_editar_reserva_confirmada PASSED [ 56%]
+2026-11-22T17:48:53.8338575Z tests/test_requirements.py::test_ADMIN06_eliminar_reserva_y_liberar_huesped_para_borrado PASSED [ 58%]
+2026-11-22T17:48:54.0536657Z tests/test_requirements.py::test_ADMIN07_preparar_limpieza_y_completarla_desde_panel PASSED [ 59%]
+2026-11-22T17:48:54.2888977Z tests/test_requirements.py::test_ADMIN08_no_preparar_limpieza_para_habitacion_ocupada PASSED [ 61%]
+2026-11-22T17:48:54.5213216Z tests/test_requirements.py::test_ADMIN09_no_editar_reserva_en_curso PASSED [ 62%]
+2026-11-22T17:48:54.7508091Z tests/test_requirements.py::test_ADMIN10_crear_habitacion_crea_espacio_y_sensor PASSED [ 64%]
+2026-11-22T17:48:54.9782364Z tests/test_requirements.py::test_ADMIN11_editar_habitacion_sincroniza_capacidad_espacio_y_sensor PASSED [ 66%]
+2026-11-22T17:48:55.1820440Z tests/test_requirements.py::test_ADMIN12_eliminar_habitacion_sin_historial_elimina_sensor_y_espacio PASSED [ 67%]
+2026-11-22T17:48:55.3930961Z tests/test_requirements.py::test_ADMIN13_habitacion_con_historial_se_desactiva_en_vez_de_borrarse PASSED [ 69%]
+2026-11-22T17:48:55.5971891Z tests/test_requirements.py::test_ADMIN14_reactivar_habitacion PASSED     [ 70%]
+2026-11-22T17:48:55.8052670Z tests/test_requirements.py::test_ADMIN15_no_desactivar_habitacion_con_reserva_en_curso PASSED [ 72%]
+2026-11-22T17:48:56.0074447Z tests/test_requirements.py::test_ADMIN16_estado_manual_solo_permite_disponible_o_limpieza PASSED [ 74%]
+2026-11-22T17:48:56.3180802Z tests/test_requirements.py::test_ADMIN17_usuario_edicion_nombre_rol_password_y_login PASSED [ 75%]
+2026-11-22T17:48:56.5211810Z tests/test_requirements.py::test_ADMIN18_proteger_sesion_actual_de_cambio_de_rol_o_desactivacion PASSED [ 77%]
+2026-11-22T17:48:56.8369212Z tests/test_requirements.py::test_ADMIN19_eliminar_usuario_sin_historial_y_proteger_usuario_con_historial PASSED [ 79%]
+2026-11-22T17:48:57.0416891Z tests/test_requirements.py::test_ADMIN20_crear_sensor_y_proteger_sensor_activo_unico_por_espacio PASSED [ 80%]
+2026-11-22T17:48:57.2542427Z tests/test_requirements.py::test_ADMIN21_quitar_sensor_con_lecturas_lo_desactiva_y_conserva_historial PASSED [ 82%]
+2026-11-22T17:48:57.4569003Z tests/test_requirements.py::test_ADMIN22_reset_operativo_requiere_frase_y_conserva_configuracion PASSED [ 83%]
+2026-11-22T17:48:57.6592296Z tests/test_requirements.py::test_ADMIN23_bitacora_solo_admin_y_registra_acciones PASSED [ 85%]
+2026-11-22T17:48:57.8548415Z tests/test_requirements.py::test_ADMIN24_crear_habitacion_valida_numero_unico_y_capacidad PASSED [ 87%]
+2026-11-22T17:48:58.0532478Z tests/test_requirements.py::test_ADMIN25_sensor_inactivo_no_recibe_lecturas PASSED [ 88%]
+2026-11-22T17:48:58.2713856Z tests/test_requirements.py::test_ADMIN26_sensor_eliminado_sin_historial_no_se_recrea_al_reiniciar PASSED [ 90%]
+2026-11-22T17:48:58.4383864Z tests/test_requirements.py::test_ADMIN27_migracion_de_base_v2_agrega_columnas_y_bitacora PASSED [ 91%]
+2026-11-22T17:48:58.6003000Z tests/test_requirements.py::test_ADMIN28_nuevas_rutas_administrativas_rechazan_roles_no_admin PASSED [ 93%]
+2026-11-22T17:48:58.7736764Z tests/test_requirements.py::test_RNF06C_sensor_recupera_estado_despues_de_lectura_desactualizada PASSED [ 95%]
+2026-11-22T17:48:58.7749506Z tests/test_unit_business_rules.py::test_unit_CP_RF15_01_conteo_inferior_a_capacidad_es_normal PASSED [ 96%]
+2026-11-22T17:48:58.7766582Z tests/test_unit_business_rules.py::test_unit_CP_RF16_01_conteo_igual_a_capacidad_es_completo PASSED [ 98%]
+2026-11-22T17:48:58.8219382Z tests/test_unit_business_rules.py::test_unit_CP_RF16_02_conteo_superior_a_capacidad_es_excedido PASSED [100%]
+2026-11-22T17:48:58.8220160Z 
+2026-11-22T17:48:58.8220441Z ================================ tests coverage ================================
+2026-11-22T17:48:58.8221724Z _______________ coverage: platform linux, python 3.12.16-final-0 _______________
+2026-11-22T17:48:58.8223015Z 
+2026-11-22T17:48:58.8223191Z Name                 Stmts   Miss Branch BrPart  Cover   Missing
+2026-11-22T17:48:58.8223580Z ----------------------------------------------------------------
+2026-11-22T17:48:58.8223961Z casa_ogro/rules.py       6      0      4      0   100%
+2026-11-22T17:48:58.8224299Z ----------------------------------------------------------------
+2026-11-22T17:48:58.8225732Z TOTAL                    6      0      4      0   100%
+2026-11-22T17:48:58.8226083Z ============================= 62 passed in 12.60s ===
