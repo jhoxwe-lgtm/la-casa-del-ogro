@@ -1,6 +1,6 @@
 # Casos de prueba del panel de Administración completa (v3)
 
-Este anexo contiene las pruebas de soporte del panel que permiten preparar demostraciones manuales de RF y RNF. Se ejecutan con rol Administrador y una base de datos de prueba o de demostración. Las 28 pruebas complementarias también están automatizadas en `tests/test_requirements.py`.
+Este anexo contiene las pruebas de soporte del panel que permiten preparar demostraciones manuales de RF y RNF. Se ejecutan con rol Administrador y una base de datos de prueba o de demostración. Las 29 pruebas complementarias también están automatizadas en `tests/test_requirements.py`.
 
 | ID | Prueba manual | Datos / pasos | Resultado esperado | Relación |
 |---|---|---|---|---|
@@ -32,6 +32,7 @@ Este anexo contiene las pruebas de soporte del panel que permiten preparar demos
 | ADM-26 | Persistencia de sensor eliminado | Quitar un sensor sin lecturas y reiniciar el servidor. | El sensor eliminado permanece fuera del listado; el arranque no lo vuelve a crear. | Persistencia / gestión de sensores |
 | ADM-27 | Migración de base anterior | Copiar una base v2 sin columna `rooms.active` y abrir v3. | La aplicación migra la base y crea bitácora automáticamente, sin borrar registros. | Compatibilidad / persistencia |
 | ADM-28 | Seguridad de rutas nuevas | Con rol Recepción, llamar a creación de habitación/sensor y limpieza de datos. | Se rechazan todas las operaciones con 403. | RNF-01 |
+| ADM-29 | Evitar limpieza pendiente duplicada | Preparar la habitación, iniciar limpieza y volver a iniciar sin finalizar el primer registro. | El segundo intento se rechaza con 409; queda un único registro pendiente. | RF-05 / integridad |
 
 ## Evidencias a guardar
 
