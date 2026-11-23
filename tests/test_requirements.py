@@ -78,7 +78,7 @@ def test_RF10_checkin_regla_horaria(client, clock):
 def test_RF11_checkout_y_estado_limpieza(client, clock):
     rid,rid_room=reservation(client,checkin='2026-11-17T15:00:00-03:00',checkout='2026-11-18T12:00:00-03:00')
     clock['value']='2026-11-17T15:30:00-03:00'; assert client.request('POST',f'/api/reservations/{rid}/check-in',{})[0]==200
-    clock['value']='2026-11-18T11:30:00-03:00'; assert client.request('POST',f'/api/reservations/{rid}/check-out',{})[0]==200
+    clock['value']='2026-11-18T12:00:00-03:00'; assert client.request('POST',f'/api/reservations/{rid}/check-out',{})[0]==200
     _,room,_=client.request('GET',f'/api/rooms/{rid_room}')
     assert room['state']=='en limpieza'
 
@@ -473,3 +473,77 @@ def test_ADMIN28_nuevas_rutas_administrativas_rechazan_roles_no_admin(client):
     assert client.request('POST','/api/admin/rooms',{'number':'777','room_type':'Doble','capacity':2})[0]==403
     assert client.request('POST','/api/admin/sensors',{'sensor_id':'sensor-extra','space_id':1})[0]==403
     assert client.request('POST','/api/admin/reset-operational-data',{'confirm':'LIMPIAR DATOS OPERATIVOS'})[0]==403
+
+
+# CP-RF-11-03: el check-out de Recepción debe rechazarse después de las 12:00 exactas.
+def test_RF11C_checkout_a_las_1201_requiere_autorizacion_admin(client,clock):
+    rid,_=reservation(client,checkin='2026-11-17T15:00:00-03:00',checkout='2026-11-18T12:00:00-03:00')
+    clock['value']='2026-11-17T15:30:00-03:00'
+    assert client.request('POST',f'/api/reservations/{rid}/check-in',{})[0]==200
+    clock['value']='2026-11-18T12:01:00-03:00'
+    status,_,_=client.request('POST',f'/api/reservations/{rid}/check-out',{})
+    assert status==403
+    admin=admin_client(client)
+    status,_,_=admin.request('POST',f'/api/reservations/{rid}/check-out',{})
+    assert status==200
+
+
+# CP-RF-12-03: no se pueden modificar reservas que ya están en curso.
+def test_RF12C_no_modificar_reserva_en_curso_por_endpoint_operativo(client,clock):
+    rid,_=reservation(client,checkin='2026-11-17T15:00:00-03:00',checkout='2026-11-18T12:00:00-03:00')
+    clock['value']='2026-11-17T15:30:00-03:00'
+    assert client.request('POST',f'/api/reservations/{rid}/check-in',{})[0]==200
+    admin=admin_client(client)
+    status,_,_=admin.request('POST',f'/api/reservations/{rid}/modify',{'checkin':'2026-11-20T15:00:00-03:00'})
+    assert status==409
+    _,rows,_=admin.request('GET','/api/reservations')
+    saved=next(row for row in rows if row['id']==rid)
+    assert saved['status']=='en_curso' and saved['checkin'].startswith('2026-11-17')
+
+
+# CP-RF-12-04: tampoco se pueden modificar reservas que ya fueron completadas.
+def test_RF12D_no_modificar_reserva_completada_por_endpoint_operativo(client,clock):
+    rid,_=reservation(client,checkin='2026-11-17T15:00:00-03:00',checkout='2026-11-18T12:00:00-03:00')
+    clock['value']='2026-11-17T15:30:00-03:00'
+    assert client.request('POST',f'/api/reservations/{rid}/check-in',{})[0]==200
+    clock['value']='2026-11-18T11:30:00-03:00'
+    assert client.request('POST',f'/api/reservations/{rid}/check-out',{})[0]==200
+    admin=admin_client(client)
+    status,_,_=admin.request('POST',f'/api/reservations/{rid}/modify',{'checkin':'2026-11-20T15:00:00-03:00'})
+    assert status==409
+    _,rows,_=admin.request('GET','/api/reservations')
+    saved=next(row for row in rows if row['id']==rid)
+    assert saved['status']=='completada' and saved['checkin'].startswith('2026-11-17')
+
+
+# CP-RF-13-03: una reserva en curso no debe poder cancelarse.
+def test_RF13C_no_cancelar_reserva_en_curso(client,clock):
+    rid,room=reservation(client,checkin='2026-11-17T15:00:00-03:00',checkout='2026-11-18T12:00:00-03:00')
+    clock['value']='2026-11-17T15:30:00-03:00'
+    assert client.request('POST',f'/api/reservations/{rid}/check-in',{})[0]==200
+    admin=admin_client(client)
+    status,_,_=admin.request('POST',f'/api/reservations/{rid}/cancel',{})
+    assert status==409
+    _,rows,_=admin.request('GET','/api/reservations')
+    saved=next(row for row in rows if row['id']==rid)
+    assert saved['status']=='en_curso'
+    clock['value']='2026-11-18T11:30:00-03:00'
+    status,_,_=client.request('POST',f'/api/reservations/{rid}/check-out',{})
+    assert status==200
+    _,room_data,_=client.request('GET',f'/api/rooms/{room}')
+    assert room_data['state']=='en limpieza'
+
+
+# ADM-29: una habitación no puede tener dos registros de limpieza pendientes.
+def test_ADMIN29_no_permitir_inicios_de_limpieza_duplicados(client):
+    admin=admin_client(client)
+    room=room_id(admin)
+    status,_,_=admin.request('POST',f'/api/admin/rooms/{room}/prepare-cleaning',{})
+    assert status==200
+    first_status,_,_=admin.request('POST',f'/api/rooms/{room}/cleaning/start',{})
+    second_status,second_data,_=admin.request('POST',f'/api/rooms/{room}/cleaning/start',{})
+    assert first_status==201
+    assert second_status==409
+    assert 'pendiente' in second_data['error']
+    _,management,_=admin.request('GET','/api/admin/management')
+    assert len([row for row in management['cleanings'] if row['room_id']==room and row['finished_at'] is None])==1
