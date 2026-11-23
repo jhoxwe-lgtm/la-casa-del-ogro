@@ -547,3 +547,28 @@ def test_ADMIN29_no_permitir_inicios_de_limpieza_duplicados(client):
     assert 'pendiente' in second_data['error']
     _,management,_=admin.request('GET','/api/admin/management')
     assert len([row for row in management['cleanings'] if row['room_id']==room and row['finished_at'] is None])==1
+
+
+# CP-RF-13-04: una reserva completada tampoco puede cancelarse.
+def test_RF13D_no_cancelar_reserva_completada(client,clock):
+    rid,_=reservation(client,checkin='2026-11-17T15:00:00-03:00',checkout='2026-11-18T12:00:00-03:00')
+    clock['value']='2026-11-17T15:30:00-03:00'
+    assert client.request('POST',f'/api/reservations/{rid}/check-in',{})[0]==200
+    clock['value']='2026-11-18T11:30:00-03:00'
+    assert client.request('POST',f'/api/reservations/{rid}/check-out',{})[0]==200
+    admin=admin_client(client)
+    status,_,_=admin.request('POST',f'/api/reservations/{rid}/cancel',{})
+    assert status==409
+    _,rows,_=admin.request('GET','/api/reservations')
+    saved=next(row for row in rows if row['id']==rid)
+    assert saved['status']=='completada'
+
+
+# CP-RF-06-04: un valor booleano no es un conteo entero válido de personas.
+def test_RF06D_rechazar_conteo_booleano_de_sensor(client):
+    client.request('POST','/api/readings',{'sensor_id':'sensor-piscina','count':15})
+    status,_,_=client.request('POST','/api/readings',{'sensor_id':'sensor-piscina','count':True})
+    assert status==400
+    _,spaces,_=client.request('GET','/api/occupancy')
+    pool=next(row for row in spaces if row['kind']=='piscina')
+    assert pool['count']==15
