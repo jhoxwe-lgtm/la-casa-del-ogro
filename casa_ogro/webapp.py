@@ -7,6 +7,7 @@ from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server, WSGIServer
 from socketserver import ThreadingMixIn
 from .db import connect, init_db, verify_password, password_hash
+from .rules import classify_occupancy, is_after_checkout_cutoff, is_confirmed_reservation, is_reading_stale
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DB = BASE_DIR / 'data' / 'casa_ogro.sqlite3'
@@ -194,7 +195,7 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                 if not reservation: raise APIError(404,'Reserva no encontrada.')
                 now=parse_dt(current_time())
                 if action=='modify' and method=='POST':
-                    if reservation['status']!='confirmada': raise APIError(409,'Solo se pueden modificar reservas confirmadas. Las reservas en curso o cerradas mantienen su historial.')
+                    if not is_confirmed_reservation(reservation['status']): raise APIError(409,'Solo se pueden modificar reservas confirmadas. Las reservas en curso o cerradas mantienen su historial.')
                     new_start=parse_dt(data.get('checkin',reservation['checkin'])); new_end=parse_dt(data.get('checkout',reservation['checkout']))
                     if new_end<=new_start: raise APIError(400,'La salida debe ser posterior a la entrada.')
                     if parse_dt(reservation['checkin'])-now < timedelta(hours=24) and user['role']!='admin': raise APIError(403,'Se requiere autorización del Administrador para modificar dentro de las últimas 24 horas.')
@@ -203,7 +204,7 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                     conn.execute('UPDATE reservations SET checkin=?,checkout=? WHERE id=?',(new_start.isoformat(),new_end.isoformat(),rid)); audit(conn,user,'modificar fechas','reserva',rid); conn.commit()
                     return response(start_response,200,serial(conn.execute('SELECT * FROM reservations WHERE id=?',(rid,)).fetchone()))
                 if action=='cancel' and method=='POST':
-                    if reservation['status']!='confirmada': raise APIError(409,'Solo se pueden cancelar reservas confirmadas. Las reservas en curso o cerradas no se pueden cancelar.')
+                    if not is_confirmed_reservation(reservation['status']): raise APIError(409,'Solo se pueden cancelar reservas confirmadas. Las reservas en curso o cerradas no se pueden cancelar.')
                     if parse_dt(reservation['checkin'])-now < timedelta(hours=24) and user['role']!='admin': raise APIError(403,'Se requiere autorización del Administrador para una cancelación tardía.')
                     conn.execute("UPDATE reservations SET status='cancelada' WHERE id=?",(rid,)); audit(conn,user,'cancelar','reserva',rid); conn.commit()
                     return response(start_response,200,{'message':'Reserva cancelada.','reservation':serial(conn.execute('SELECT * FROM reservations WHERE id=?',(rid,)).fetchone())})
@@ -217,7 +218,7 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                     return response(start_response,200,{'message':'Check-in registrado.','room_state':'ocupada'})
                 if action=='check-out' and method=='POST':
                     if now.date() < parse_dt(reservation['checkout']).date(): raise APIError(409,'El check-out no puede registrarse antes de la fecha de salida.')
-                    if (now.hour,now.minute,now.second,now.microsecond) > (12,0,0,0) and user['role']!='admin': raise APIError(403,'El check-out después de las 12:00 requiere autorización del Administrador.')
+                    if is_after_checkout_cutoff(now) and user['role']!='admin': raise APIError(403,'El check-out después de las 12:00 requiere autorización del Administrador.')
                     if reservation['status']!='en_curso': raise APIError(409,'La reserva no está en curso.')
                     conn.execute("UPDATE rooms SET state='en limpieza' WHERE id=?",(reservation['room_id'],)); conn.execute("UPDATE reservations SET status='completada' WHERE id=?",(rid,)); audit(conn,user,'registrar check-out','reserva',rid); conn.commit()
                     return response(start_response,200,{'message':'Check-out registrado.','room_state':'en limpieza'})
@@ -467,15 +468,13 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                 allowed={'sensor_id','count','timestamp'}
                 if set(data)-allowed: raise APIError(400,'La lectura solo admite sensor_id, count y timestamp; no se reciben imágenes ni datos personales.')
                 count=data['count']
-                if not isinstance(count,int) or count<0: raise APIError(400,'El conteo debe ser un entero igual o mayor que cero.')
+                if isinstance(count,bool) or not isinstance(count,int) or count<0: raise APIError(400,'El conteo debe ser un entero igual o mayor que cero.')
                 sensor=conn.execute("SELECT s.*,p.capacity,p.kind,p.name,rm.active AS room_active FROM sensors s JOIN spaces p ON p.id=s.space_id LEFT JOIN rooms rm ON rm.id=p.room_id WHERE s.sensor_id=? AND s.active=1 AND (p.kind='piscina' OR rm.active=1)",(data['sensor_id'],)).fetchone()
                 if not sensor: raise APIError(400,'Sensor no identificado o inactivo; no se modifica el último conteo válido.')
                 received_at=data.get('timestamp') or current_time(); parse_dt(received_at)
                 cur=conn.execute('INSERT INTO readings(sensor_id,space_id,people_count,received_at) VALUES(?,?,?,?)',(sensor['sensor_id'],sensor['space_id'],count,received_at))
                 if user and user['role']=='admin': audit(conn,user,'enviar lectura','sensor',sensor['sensor_id'],f'conteo {count}')
-                cap=sensor['capacity']; level='normal'
-                if count==cap: level='completo'
-                elif count>cap: level='excedido'
+                cap=sensor['capacity']; level=classify_occupancy(count,cap)
                 alert_id=None
                 if level in ('completo','excedido'):
                     a=conn.execute('INSERT INTO alerts(space_id,reading_id,people_count,capacity,level,created_at) VALUES(?,?,?,?,?,?)',(sensor['space_id'],cur.lastrowid,count,cap,level,received_at)); alert_id=a.lastrowid
@@ -530,7 +529,7 @@ def occupancy_data(conn,current_time):
         last=conn.execute('SELECT * FROM readings WHERE space_id=? ORDER BY received_at DESC,id DESC LIMIT 1',(p['id'],)).fetchone()
         if not last: state='sin datos'; count=None; received=None
         else:
-            received=last['received_at']; count=last['people_count']; state='desactualizado' if now-parse_dt(received)>timedelta(minutes=2) else ('completo' if count==p['capacity'] else 'excedido' if count>p['capacity'] else 'normal')
+            received=last['received_at']; count=last['people_count']; state='desactualizado' if is_reading_stale(now,parse_dt(received)) else classify_occupancy(count,p['capacity'])
         out.append({'space_id':p['id'],'name':p['name'],'kind':p['kind'],'capacity':p['capacity'],'count':count,'received_at':received,'state':state,'sensor_id':p['sensor_id']})
     return out
 
