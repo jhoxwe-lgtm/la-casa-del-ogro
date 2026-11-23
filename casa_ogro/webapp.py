@@ -463,6 +463,9 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                     conn.execute('UPDATE spaces SET capacity=? WHERE id=?',(cap,space['id']))
                 audit(conn,user,'cambiar capacidad','espacio',space['id'],str(cap)); conn.commit(); return response(start_response,200,{'space_id':space['id'],'capacity':cap})
             # Sensor readings and occupancy
+            # >>> PRESENTACIÓN 2 | RECEPCIÓN DE DATOS
+            # El servidor recibe la lectura, valida el sensor y el conteo,
+            # guarda los datos y comprueba si debe generar una alerta.
             if path == '/api/readings' and method == 'POST':
                 require_fields(data,'sensor_id','count')
                 allowed={'sensor_id','count','timestamp'}
@@ -480,9 +483,12 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                     a=conn.execute('INSERT INTO alerts(space_id,reading_id,people_count,capacity,level,created_at) VALUES(?,?,?,?,?,?)',(sensor['space_id'],cur.lastrowid,count,cap,level,received_at)); alert_id=a.lastrowid
                 conn.commit()
                 return response(start_response,201,{'reading_id':cur.lastrowid,'space_id':sensor['space_id'],'space':sensor['name'],'count':count,'capacity':cap,'state':level,'alert_id':alert_id,'received_at':received_at})
+            # PRESENTACIÓN: esta ruta devuelve el estado actual de los espacios.
             if path == '/api/occupancy' and method == 'GET':
                 require_roles(user,'recepcion','admin','limpieza')
                 return response(start_response,200,occupancy_data(conn,current_time()))
+            # >>> PRESENTACIÓN 5 | CONSULTA DE ALERTAS
+            # Permite consultar las alertas y saber cuáles siguen pendientes.
             if path == '/api/alerts' and method == 'GET':
                 require_roles(user,'recepcion','admin')
                 rows=conn.execute('SELECT a.*,s.name AS space_name,u.username AS reviewed_by_name FROM alerts a JOIN spaces s ON s.id=a.space_id LEFT JOIN users u ON u.id=a.reviewed_by ORDER BY a.id DESC').fetchall()

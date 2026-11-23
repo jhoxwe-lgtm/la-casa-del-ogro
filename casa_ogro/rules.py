@@ -3,6 +3,9 @@
 from datetime import datetime, timedelta
 
 
+# >>> PRESENTACIÓN 3 | REGLA DEL AFORO
+# Compara las personas detectadas con la capacidad máxima:
+# menos = normal; igual = completo; mayor = excedido.
 def classify_occupancy(count: int, capacity: int) -> str:
     """Clasifica un aforo en normal, completo o excedido."""
     if isinstance(count, bool) or not isinstance(count, int) or count < 0:
@@ -16,6 +19,7 @@ def classify_occupancy(count: int, capacity: int) -> str:
     return "excedido"
 
 
+# Regla adicional: comprueba si una lectura lleva más de dos minutos.
 def is_reading_stale(now: datetime, received_at: datetime, max_age_minutes: int = 2) -> bool:
     """Indica si una lectura superó la antigüedad máxima permitida."""
     return now - received_at > timedelta(minutes=max_age_minutes)

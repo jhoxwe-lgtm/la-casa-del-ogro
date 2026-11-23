@@ -10,6 +10,9 @@ from casa_ogro.rules import (
 )
 
 
+# >>> PRESENTACIÓN 4 | PRUEBAS AUTOMATIZADAS
+# Estas pruebas comprueban los tres resultados del aforo:
+# 19/20 = normal, 20/20 = completo y 21/20 = excedido.
 def test_CP_RF15_02_conteo_menor_capacidad():
     assert classify_occupancy(19, 20) == "normal"
 
