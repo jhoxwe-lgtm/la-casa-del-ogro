@@ -194,6 +194,7 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                 if not reservation: raise APIError(404,'Reserva no encontrada.')
                 now=parse_dt(current_time())
                 if action=='modify' and method=='POST':
+                    if reservation['status']!='confirmada': raise APIError(409,'Solo se pueden modificar reservas confirmadas. Las reservas en curso o cerradas mantienen su historial.')
                     new_start=parse_dt(data.get('checkin',reservation['checkin'])); new_end=parse_dt(data.get('checkout',reservation['checkout']))
                     if new_end<=new_start: raise APIError(400,'La salida debe ser posterior a la entrada.')
                     if parse_dt(reservation['checkin'])-now < timedelta(hours=24) and user['role']!='admin': raise APIError(403,'Se requiere autorización del Administrador para modificar dentro de las últimas 24 horas.')
@@ -202,8 +203,8 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                     conn.execute('UPDATE reservations SET checkin=?,checkout=? WHERE id=?',(new_start.isoformat(),new_end.isoformat(),rid)); audit(conn,user,'modificar fechas','reserva',rid); conn.commit()
                     return response(start_response,200,serial(conn.execute('SELECT * FROM reservations WHERE id=?',(rid,)).fetchone()))
                 if action=='cancel' and method=='POST':
+                    if reservation['status']!='confirmada': raise APIError(409,'Solo se pueden cancelar reservas confirmadas. Las reservas en curso o cerradas no se pueden cancelar.')
                     if parse_dt(reservation['checkin'])-now < timedelta(hours=24) and user['role']!='admin': raise APIError(403,'Se requiere autorización del Administrador para una cancelación tardía.')
-                    if reservation['status'] in ('cancelada','completada'): raise APIError(409,'La reserva ya está cerrada.')
                     conn.execute("UPDATE reservations SET status='cancelada' WHERE id=?",(rid,)); audit(conn,user,'cancelar','reserva',rid); conn.commit()
                     return response(start_response,200,{'message':'Reserva cancelada.','reservation':serial(conn.execute('SELECT * FROM reservations WHERE id=?',(rid,)).fetchone())})
                 if action=='check-in' and method=='POST':
@@ -216,7 +217,7 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                     return response(start_response,200,{'message':'Check-in registrado.','room_state':'ocupada'})
                 if action=='check-out' and method=='POST':
                     if now.date() < parse_dt(reservation['checkout']).date(): raise APIError(409,'El check-out no puede registrarse antes de la fecha de salida.')
-                    if now.hour > 12 and user['role']!='admin': raise APIError(403,'El check-out después de las 12:00 requiere autorización del Administrador.')
+                    if (now.hour,now.minute,now.second,now.microsecond) > (12,0,0,0) and user['role']!='admin': raise APIError(403,'El check-out después de las 12:00 requiere autorización del Administrador.')
                     if reservation['status']!='en_curso': raise APIError(409,'La reserva no está en curso.')
                     conn.execute("UPDATE rooms SET state='en limpieza' WHERE id=?",(reservation['room_id'],)); conn.execute("UPDATE reservations SET status='completada' WHERE id=?",(rid,)); audit(conn,user,'registrar check-out','reserva',rid); conn.commit()
                     return response(start_response,200,{'message':'Check-out registrado.','room_state':'en limpieza'})
@@ -228,6 +229,8 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                 if not room: raise APIError(404,'Habitación no encontrada.')
                 if action=='start':
                     if room['state']!='en limpieza': raise APIError(409,'La habitación debe estar en limpieza para iniciar el registro.')
+                    pending=conn.execute('SELECT 1 FROM cleanings WHERE room_id=? AND finished_at IS NULL LIMIT 1',(room_id,)).fetchone()
+                    if pending: raise APIError(409,'Ya existe una limpieza iniciada y pendiente para esta habitación.')
                     cur=conn.execute('INSERT INTO cleanings(room_id,started_at,user_id) VALUES(?,?,?)',(room_id,current_time(),user['id']));
                     if user['role']=='admin': audit(conn,user,'iniciar limpieza','habitación',room_id)
                     conn.commit()
