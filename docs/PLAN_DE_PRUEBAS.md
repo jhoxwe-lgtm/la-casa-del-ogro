@@ -77,6 +77,7 @@ Los pasos pueden ejecutarse en la interfaz cuando el módulo está disponible o 
 | CP-RF-16-02 | `classify_occupancy` | 20 personas, capacidad 20. | `completo`. |
 | CP-RF-16-03 | `classify_occupancy` | 21 personas, capacidad 20. | `excedido`. |
 | CP-RF-06-03 | `classify_occupancy` | Conteo -1. | Rechaza el dato con `ValueError`. |
+| CP-RF-06-05 | `classify_occupancy` | Conteo booleano `True`. | Rechaza el dato con `ValueError`.
 | CP-RF-14-03 | `classify_occupancy` | Capacidad 0. | Rechaza el dato con `ValueError`. |
 | CP-RNF-06-03 | `is_reading_stale` | Antigüedad exacta de 2 minutos. | La lectura sigue vigente. |
 | CP-RNF-06-04 | `is_reading_stale` | Antigüedad de 2 minutos y 1 segundo. | La lectura se considera antigua. |
