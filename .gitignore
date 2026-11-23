@@ -26,3 +26,7 @@ evidence/*.tmp
 Thumbs.db
 .vscode/
 .idea/
+
+# Test coverage artifacts
+.coverage
+htmlcov/
