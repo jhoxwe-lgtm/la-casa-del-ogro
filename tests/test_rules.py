@@ -24,7 +24,7 @@ def test_CP_RF16_03_conteo_superior_capacidad():
 
 @pytest.mark.parametrize(
     ("count", "capacity"),
-    [(-1, 20), (10, 0)],
+    [(-1, 20), (True, 20), (10, 0)],
     ids=["conteo-negativo", "capacidad-cero"],
 )
 def test_CP_RF06_RF14_rechazar_valores_invalidos(count, capacity):
