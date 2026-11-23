@@ -7,14 +7,14 @@ Prototipo web para el Sistema de Gestión Hotelera **La Casa del Ogro**, basado 
 - Python 3.10 o superior (recomendado 3.11+).
 - Servidor WSGI y SQLite de la biblioteca estándar; no requiere Flask ni servidor de base de datos externo.
 - HTML, CSS y JavaScript sin framework.
-- Pytest para pruebas automatizadas.
+- Pytest y pytest-cov para pruebas automatizadas y cobertura de ramas.
 
 ## Ejecutar en Windows
 
 1. Descomprime el ZIP en una carpeta, por ejemplo `C:\CasaDelOgro`.
 2. Abre esa carpeta en Visual Studio Code o una terminal.
 3. Comprueba Python con `py --version`.
-4. Instala Pytest si todavía no está: `py -m pip install pytest`.
+4. Instala las dependencias de pruebas: `py -m pip install -r requirements-dev.txt`.
 5. Ejecuta `run_demo.bat`.
 6. Abre `http://127.0.0.1:8000`.
 
@@ -66,10 +66,13 @@ La sección incluye un recorrido recomendado en `docs/GUIA_PANEL_ADMINISTRACION.
 Ejecuta `run_tests.bat` o usa:
 
 ```bash
-py -m pytest -v
+py -m pip install -r requirements-dev.txt
+py -m pytest -v --cov=casa_ogro.rules --cov-branch --cov-report=term-missing
 ```
 
-La suite de esta versión contiene **58 pruebas automatizadas**: 30 casos asociados a RF/RNF (17 funcionales, 7 no funcionales y 6 complementarios) y 28 pruebas del panel administrativo ampliado. La evidencia se genera desde la ejecución actual; si modificas el código, vuelve a ejecutar la suite y reemplaza el registro.
+La rama de correcciones incorpora **80 casos automatizados**: 51 casos funcionales/no funcionales y de reglas de negocio, más 29 pruebas del panel administrativo ampliado. La cobertura de caja blanca se mide expresamente sobre `casa_ogro.rules`; no representa la cobertura total de toda la aplicación.
+
+**Importante:** `evidence/pytest_results.txt` conserva la ejecución histórica de 58 pruebas de la versión base. Después de ejecutar esta rama, guarda una nueva salida con los 80 casos, la cobertura, la fecha y el commit probado; no presentes la evidencia histórica como si correspondiera a esta versión.
 
 ## Limitaciones que deben explicarse en la presentación
 
