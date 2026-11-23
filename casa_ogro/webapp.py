@@ -169,7 +169,7 @@ def create_application(db_path: str | Path = DEFAULT_DB, clock=None):
                 require_roles(user,'admin')
                 rid=int(m.group(1)); reservation=conn.execute('SELECT * FROM reservations WHERE id=?',(rid,)).fetchone()
                 if not reservation: raise APIError(404,'Reserva no encontrada.')
-                if reservation['status']!='confirmada': raise APIError(409,'Solo se pueden editar reservas confirmadas desde este panel. Las reservas en curso o cerradas mantienen su historial.')
+                if not is_confirmed_reservation(reservation['status']): raise APIError(409,'Solo se pueden editar reservas confirmadas desde este panel. Las reservas en curso o cerradas mantienen su historial.')
                 guest_id=int(data.get('guest_id',reservation['guest_id'])); room_id=int(data.get('room_id',reservation['room_id']))
                 guest=conn.execute('SELECT id FROM guests WHERE id=?',(guest_id,)).fetchone()
                 room=conn.execute('SELECT * FROM rooms WHERE id=?',(room_id,)).fetchone()
