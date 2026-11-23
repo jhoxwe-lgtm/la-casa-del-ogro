@@ -57,3 +57,25 @@ ADMIN;ADM-25;Soporte de pruebas;Automatizada;tests/test_requirements.py;Rechazar
 ADMIN;ADM-26;Soporte de pruebas;Automatizada;tests/test_requirements.py;Sensor borrado sin historia no reaparece tras reinicio
 ADMIN;ADM-27;Soporte de pruebas;Automatizada;tests/test_requirements.py;Migración automática del esquema v2 a v3
 ADMIN;ADM-28;Soporte de pruebas;Automatizada;tests/test_requirements.py;Nuevas rutas administrativas protegidas por rol
+RF-11;CP-RF-11-03;Funcional;Automatizada;tests/test_requirements.py;A las 12:01 Recepción requiere autorización administrativa
+RF-12;CP-RF-12-03;Funcional;Automatizada;tests/test_requirements.py;Modificar reserva en curso se rechaza con 409
+RF-12;CP-RF-12-04;Funcional;Automatizada;tests/test_requirements.py;Modificar reserva completada se rechaza con 409
+RF-13;CP-RF-13-03;Funcional;Automatizada;tests/test_requirements.py;Cancelar reserva en curso se rechaza y permite completar check-out
+RF-13;CP-RF-13-04;Funcional;Automatizada;tests/test_requirements.py;Cancelar reserva completada se rechaza
+RF-06;CP-RF-06-04;Funcional;Automatizada;tests/test_requirements.py;Conteo booleano enviado por API se rechaza
+ADMIN;ADM-29;Soporte de pruebas;Automatizada;tests/test_requirements.py;Segundo inicio de limpieza pendiente se rechaza
+RF-15;CP-RF-15-02;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Conteo inferior a capacidad clasifica normal
+RF-16;CP-RF-16-02;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Conteo igual a capacidad clasifica completo
+RF-16;CP-RF-16-03;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Conteo superior a capacidad clasifica excedido
+RF-06;CP-RF-06-03;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Conteo negativo rechazado por regla
+RF-06;CP-RF-06-05;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Valor booleano rechazado por regla de conteo
+RF-14;CP-RF-14-03;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Capacidad cero rechazada por regla
+RNF-06;CP-RNF-06-03;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Lectura a los 2 minutos exactos sigue vigente
+RNF-06;CP-RNF-06-04;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Lectura a los 2 minutos y 1 segundo se marca antigua
+RF-11;CP-RF-11-04;Unitaria / caja blanca;Automatizada;tests/test_rules.py;11:59 no supera el corte
+RF-11;CP-RF-11-05;Unitaria / caja blanca;Automatizada;tests/test_rules.py;12:00:00 exactas no supera el corte
+RF-11;CP-RF-11-06;Unitaria / caja blanca;Automatizada;tests/test_rules.py;12:01 supera el corte
+RF-12;CP-RF-12-05;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Estado confirmada permite modificar/cancelar
+RF-12;CP-RF-12-06;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Estado en_curso no se considera confirmada
+RF-12;CP-RF-12-07;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Estado completada no se considera confirmada
+RF-12;CP-RF-12-08;Unitaria / caja blanca;Automatizada;tests/test_rules.py;Estado cancelada no se considera confirmada
