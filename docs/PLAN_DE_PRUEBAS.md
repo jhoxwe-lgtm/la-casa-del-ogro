@@ -7,15 +7,31 @@ Versión: prototipo del Ejercicio 4 con panel de Administración completa (v3).
 
 ## 1. Estrategia y alcance
 
-Se definió al menos un caso de prueba por cada requisito funcional RF-01 a RF-17 y por cada requisito no funcional RNF-01 a RNF-07: 24 casos mínimos, ampliados con casos complementarios de límites, permisos y caminos alternativos. Las pruebas unitarias y de integración de este prototipo se ejecutan con Pytest y una base SQLite temporal; las rutas se prueban como caja negra desde sus entradas y salidas HTTP. La validación de permisos también verifica que una acción no autorizada no se ejecute.
+### Alcance del prototipo
 
-| Nivel | Qué se prueba | Tipo / técnica | Herramienta | Criterio |
-|---|---|---|---|---|
-| Unitaria / lógica de servicio | Reglas de fechas, disponibilidad, cambios de estado y comparación de aforo | Caja negra y valores límite; se verifican decisiones a través de la API | Pytest + SQLite temporal | El caso produce el resultado esperado |
-| Integración | API, persistencia, usuarios, reservas, limpiezas, sensores y alertas | Caja negra; prueba de interfaces entre módulos | Pytest + SQLite temporal | El dato queda guardado y se refleja en la consulta correspondiente |
-| Sistema / aceptación | Flujo visible de la aplicación web por los roles | Caja negra; recorrido manual de los flujos principales y alternativos | Navegador web | El personal puede completar el flujo y observar el resultado |
+El prototipo implementa los 17 requisitos funcionales (RF-01 a RF-17) y los 7 requisitos no funcionales (RNF-01 a RNF-07) definidos en el Ejercicio 2. Las lecturas de aforo son simuladas; no se conecta hardware real, cámaras, reconocimiento facial ni mecanismos físicos de control de acceso.
 
-El hardware de sensores queda simulado, porque el informe de los Ejercicios 1 y 2 excluye la compra/instalación de sensores y permite usar lecturas simuladas. No se incluye bloqueo físico de accesos.
+La validación completa de algunas métricas no se puede concluir únicamente con pruebas automatizadas locales: RNF-03 exige monitoreo durante el período definido para medir disponibilidad mensual; RNF-04 requiere observar y contar interacciones reales en el navegador; RNF-02 y RNF-05 deben repetirse en el computador y entorno de la presentación.
+
+**Asistencia de IA:** se utilizó ChatGPT como apoyo para revisar reglas, proponer casos de regresión y estructurar documentación. El equipo debe ejecutar, revisar y validar los resultados en su propio entorno.
+
+### Niveles, tipos y técnicas
+
+| Nivel | Qué se prueba | Tipo | Técnica | Herramienta / entorno | Criterio de término |
+|---|---|---|---|---|---|
+| Unitaria | Reglas aisladas en `casa_ogro.rules`: clasificación de aforo, antigüedad de lectura, corte horario de check-out y estado de reserva. | Caja blanca | Cobertura de sentencias y ramas; entradas válidas, inválidas y valores límite. | Pytest + pytest-cov. Se informa la cobertura de ramas del módulo `casa_ogro.rules`. | Los caminos verdadero/falso de las reglas seleccionadas tienen pruebas; se informa cualquier rama no cubierta y el resultado real de la ejecución. |
+| Integración | Interacción entre rutas WSGI, autenticación, SQLite, reservas, habitaciones, limpieza, sensores y alertas. | Principalmente caja negra | Pruebas de interfaces, particiones de equivalencia, límites, estados y persistencia. | Pytest con cliente WSGI y SQLite temporal. | Las operaciones aceptadas/rechazadas producen el estado persistido esperado y respetan permisos e integridad. |
+| Sistema / aceptación | Recorridos completos desde el navegador con Recepción, Limpieza y Administración. | Caja negra | Escenarios de uso, flujos principales, alternativos y mediciones observables. | Navegador en el computador de demostración; capturas y logs. | Los flujos críticos se completan y cada caso manual conserva evidencia identificada por ID, fecha y commit. |
+
+Las pruebas de `tests/test_requirements.py` ejercitan principalmente las rutas y la persistencia como pruebas de integración; no se presentan como pruebas unitarias aisladas. Las pruebas unitarias de caja blanca están separadas en `tests/test_rules.py` y se concentran en las reglas puras de `casa_ogro/rules.py`.
+
+### Ejecución y herramienta
+
+En Windows, instalar dependencias con `py -m pip install -r requirements-dev.txt` y ejecutar `run_tests.bat`. El lanzador ejecuta Pytest y mide cobertura de ramas del módulo `casa_ogro.rules` con `pytest-cov`. La suite completa puede ejecutarse directamente con:
+
+```bash
+py -m pytest -v --cov=casa_ogro.rules --cov-branch --cov-report=term-missing
+```
 
 ## 2. Casos de prueba — funcionales
 
@@ -53,19 +69,62 @@ Los pasos pueden ejecutarse en la interfaz cuando el módulo está disponible o 
 | CP-RNF-06-01 | RNF-06 | Verificar caducidad de conteo. | Registrar una lectura con hora de hace más de 2 minutos y consultar aforo. | Estado visible como “desactualizado”. Prueba automatizada con reloj controlado. |
 | CP-RNF-07-01 | RNF-07 | Verificar que la entrada del sensor no acepte imágenes ni identificación. | Enviar lectura con sensor, conteo, más un campo `image` y un campo de identificación. | Se rechaza la carga adicional; el sistema solo acepta sensor, conteo y fecha/hora. |
 
+## Casos unitarios de caja blanca
+
+| ID del caso | Función | Datos | Resultado esperado |
+|---|---|---|---|
+| CP-RF-15-02 | `classify_occupancy` | 19 personas, capacidad 20. | `normal`. |
+| CP-RF-16-02 | `classify_occupancy` | 20 personas, capacidad 20. | `completo`. |
+| CP-RF-16-03 | `classify_occupancy` | 21 personas, capacidad 20. | `excedido`. |
+| CP-RF-06-03 | `classify_occupancy` | Conteo -1. | Rechaza el dato con `ValueError`. |
+| CP-RF-14-03 | `classify_occupancy` | Capacidad 0. | Rechaza el dato con `ValueError`. |
+| CP-RNF-06-03 | `is_reading_stale` | Antigüedad exacta de 2 minutos. | La lectura sigue vigente. |
+| CP-RNF-06-04 | `is_reading_stale` | Antigüedad de 2 minutos y 1 segundo. | La lectura se considera antigua. |
+| CP-RF-11-04 | `is_after_checkout_cutoff` | 11:59:00. | No supera el límite. |
+| CP-RF-11-05 | `is_after_checkout_cutoff` | 12:00:00 exactas. | No supera el límite. |
+| CP-RF-11-06 | `is_after_checkout_cutoff` | 12:01:00. | Supera el límite. |
+| CP-RF-12-05 | `is_confirmed_reservation` | Estado `confirmada`. | Devuelve verdadero. |
+| CP-RF-12-06 | `is_confirmed_reservation` | Estado `en_curso`. | Devuelve falso. |
+| CP-RF-12-07 | `is_confirmed_reservation` | Estado `completada`. | Devuelve falso. |
+| CP-RF-12-08 | `is_confirmed_reservation` | Estado `cancelada`. | Devuelve falso. |
+
+El archivo `tests/test_rules.py` contiene estos escenarios. La matriz de cobertura utiliza IDs individuales para los casos parametrizados. La cobertura se limita explícitamente a `casa_ogro.rules`; no debe interpretarse como cobertura de todo `webapp.py`.
+
 ## 4. Registro de ejecución automatizada
 
-Ejecución realizada sobre el prototipo entregado:
+### Línea base histórica (versión principal anterior a las correcciones)
 
-| Métrica | Resultado |
+El archivo `evidence/pytest_results.txt` conserva una ejecución previa de la versión base, fechada el 18 de noviembre de 2026:
+
+| Métrica | Resultado histórico |
 |---|---:|
-| Casos automatizados planificados | 58 (30 de RF/RNF + 28 de administración) |
-| Casos automatizados ejecutados | 58 |
+| Casos ejecutados | 58 |
 | Aprobados | 58 |
 | Fallidos | 0 |
-| Bloqueados en esta suite | 0 |
+| Bloqueados | 0 |
 
-Esta tabla corresponde a la suite automatizada ejecutada con Pytest. Las comprobaciones manuales de RNF-03 (99 % mensual) y RNF-04 (interacciones reales) deben conservar su propia evidencia y no se deben declarar validadas solo por el resultado automatizado.
+Este resultado corresponde a la suite anterior de 58 pruebas. **No representa la rama de correcciones actual** y no debe presentarse como evidencia de sus cambios.
+
+### Suite de la rama de correcciones
+
+La rama `fix/ejercicio4-reglas-reservas` incorpora **80 casos automatizados planificados**: 51 casos relacionados con RF/RNF y reglas de negocio, más 29 pruebas de soporte administrativo. Incluye las nuevas pruebas de regresión y las pruebas unitarias aisladas de caja blanca.
+
+| Métrica | Resultado de la rama corregida |
+|---|---:|
+| Casos planificados | 80 |
+| Casos ejecutados | Pendiente de ejecutar en VS Code |
+| Aprobados | Pendiente |
+| Fallidos | Pendiente |
+| Bloqueados | Pendiente |
+| Cobertura de ramas de `casa_ogro.rules` | Pendiente de medir |
+
+No se asignará un porcentaje de aprobación a esta rama hasta obtener una ejecución real. Después de ejecutarla, guardar la salida completa de Pytest, la cobertura, la fecha y el commit probado en `evidence/pytest_results.txt`.
+
+La medición automatizada no sustituye las comprobaciones manuales de RNF-03 (disponibilidad mensual), RNF-04 (interacciones reales del navegador) ni las mediciones en el computador de presentación para RNF-02 y RNF-05.
+
+## Registro de defectos
+
+El detalle de hallazgos, severidad, corrección y prueba de regresión está en `docs/REGISTRO_DEFECTOS.md`. Los cambios se encuentran implementados en la rama de correcciones, pero su cierre definitivo queda pendiente de ejecutar y aprobar los casos asociados.
 
 ## 5. Riesgos y limitaciones conocidos
 
@@ -94,11 +153,17 @@ No hay requisitos funcionales ni no funcionales sin un caso identificado en este
 | CP-RF-13-02 | Cancelación dentro de las últimas 24 horas | Recepción es rechazada; Administrador puede autorizarla. |
 | CP-RF-14-02 | Capacidad de habitación monitorizada | El cambio de capacidad se refleja en la comparación del sensor. |
 | CP-RNF-06-02 | Límite exacto de 2 minutos | El conteo no se marca desactualizado hasta superar los 2 minutos. |
+| CP-RF-11-03 | Check-out a las 12:01 | Recepción recibe 403; Administrador puede autorizarlo. |
+| CP-RF-12-03 | Modificar reserva en curso por la ruta operativa | Se rechaza con 409 y conserva fechas/estado. |
+| CP-RF-12-04 | Modificar reserva completada por la ruta operativa | Se rechaza con 409 y conserva historial. |
+| CP-RF-13-03 | Cancelar reserva en curso | Se rechaza con 409; el check-out posterior sigue disponible. |
+| CP-RF-13-04 | Cancelar reserva completada | Se rechaza con 409 y conserva estado completado. |
+| CP-RF-06-04 | Conteo booleano del sensor | Se rechaza; no sustituye la última lectura válida. |
 
 
 ## Administración completa — casos automatizados complementarios v3
 
-La suite incluye 28 pruebas del panel administrativo. Estas pruebas no reemplazan los 24 casos mínimos por requisito (RF-01 a RF-17 y RNF-01 a RNF-07); verifican que el panel permita preparar demostraciones y que conserve la integridad de los datos compartidos con la aplicación principal.
+La suite corregida incluye 29 pruebas del panel administrativo. Estas pruebas no reemplazan los 24 casos mínimos por requisito (RF-01 a RF-17 y RNF-01 a RNF-07); verifican que el panel permita preparar demostraciones y que conserve la integridad de los datos compartidos con la aplicación principal.
 
 | ID | Objetivo / precondición | Pasos y datos | Resultado esperado |
 |---|---|---|---|
@@ -130,6 +195,7 @@ La suite incluye 28 pruebas del panel administrativo. Estas pruebas no reemplaza
 | ADM-26 | Persistencia de sensor eliminado. | Eliminar sensor sin lecturas y reiniciar la aplicación. | El sensor eliminado no se recrea automáticamente. |
 | ADM-27 | Migración de base v2. | Abrir una base anterior sin `rooms.active` ni bitácora. | La migración añade la columna y crea la bitácora sin perder datos existentes. |
 | ADM-28 | Seguridad de nuevas rutas. | Intentar crear habitaciones/sensores o reiniciar datos desde Recepción. | Las acciones administrativas se rechazan con HTTP 403. |
+| ADM-29 | Evitar inicios de limpieza duplicados. | Preparar una habitación para limpieza, iniciar el registro y volver a pulsar iniciar sin finalizar el primero. | El segundo inicio se rechaza con 409 y se conserva una sola limpieza pendiente. |
 
 ## Evidencia manual recomendada por sección
 
